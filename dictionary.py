@@ -1,4 +1,5 @@
 from requests import post as post
+from pyttsx3 import init
 def baidu_translate(words):#请求网页
      post_url="https://fanyi.baidu.com/sug"
      #设置请求头
@@ -89,7 +90,14 @@ def file_process():
                                    words.insert(0,tmp_s)
                                    dictionary[words[0]]=[words[1],words[2:]]
      return dictionary
-dictionary=file_process()                 
+dictionary=file_process()
+def voice_read(txt):
+     engine=init()
+     engine.setProperty('rate',120)
+     engine.say(txt)
+     engine.runAndWait()
+
+
 while True:         
      word=input("请输入你要查询的单词:\n")
      if word=='q':
@@ -103,6 +111,15 @@ while True:
                    tmp_l=dictionary[word][1]
                    print(f"已找到单词,其中文译为:{dictionary[word][0]},英文同意词为:{tmp_l}")
                    flag=True
+                   print("希望朗读这个单词吗?y/n")
+                   ans=input()
+                   if ans=='y':
+                        print(word)
+                        voice_read(word)
+                   elif ans=='n':
+                        pass
+                   else:
+                        pass
           if flag==False:
               print("未找到单词\n"
                     "请问你需要添加新的单词或词组吗?\n"
