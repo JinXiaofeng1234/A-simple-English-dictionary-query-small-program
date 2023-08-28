@@ -1,5 +1,6 @@
 from requests import post as post
 from pyttsx3 import init
+from sys import exit
 def baidu_translate(words):#请求网页
      post_url="https://fanyi.baidu.com/sug"
      #设置请求头
@@ -58,39 +59,50 @@ def changed_string_list():
           print("无论怎样,字典键值不能为空,否则你怎么查字典")
           changed_string_list()
      
-def save_dict_to_txt(dictionary,filename):
-     with open(filename,"w") as f:
-          for key,value in dictionary.items():
-               f.write(f"{key} {value[0]} {value[1]}\n")
+def save_dict_to_py(dictionary,filename):
+     with open(filename,"w",encoding='utf-8') as f:
+               f.write("MyDictionary="+str(dictionary))
+
 def txt_add(Character_string):
-     with open("牛津高阶英汉双解词典（第9版 同义词）115643条.txt","a",encoding="UTF-8") as file:
+     with open("牛津高阶英汉双解词典（第9版 同义词）115643条.txt", "a", encoding="UTF-8") as file:
           file.write("\n")
           file.write(str(Character_string))
       
 def file_process():
-     with open("牛津高阶英汉双解词典（第9版 同义词）115643条.txt","r",encoding="UTF-8") as file:
+     with open("牛津高阶英汉双解词典（第9版 同义词）115643条.txt", "r", encoding="UTF-8") as file:
          l=[i.strip() for i in file]
      dictionary={}
-     new_l=[]
-     for item in l:
-          if item!='':
-              new_l.append(item)
-     for i in new_l:
+     for i in l:
           words=i.split(" ")
-          if len(words)>=3:
-               for j in words:
-                    for k in j:
-                         if '\u4e00' <= k <= '\u9fff':
-                              if words.index(j)==1:
-                                   dictionary[words[0]]=[words[1],words[2:]]
-                              else:
-                                   index=words.index(j)
-                                   tmp_s=' '.join(words[:index])
-                                   del words[:index]
-                                   words.insert(0,tmp_s)
-                                   dictionary[words[0]]=[words[1],words[2:]]
+          for j in words:
+               for k in j:
+                    if '\u4e00' <= k <= '\u9fff':
+                         if words.index(j)==1:
+                              dictionary[words[0]]=[words[1],words[2:]]
+                         else:
+                              index=words.index(j)
+                              tmp_s=' '.join(words[:index])
+                              del words[:index]
+                              words.insert(0,tmp_s)
+                              dictionary[words[0]]=[words[1],words[2:]]
      return dictionary
-dictionary=file_process()
+def load_py():
+     from output import MyDictionary
+     dictionary=MyDictionary
+     return dictionary
+dictionary={}
+if len(dictionary)==0:
+     print("字典为空，请选择导入字典的源数据\n"
+           "-0 从牛津词典导入"
+           "-1 从json文件导入")
+inputs=int(input("请输入:\n"))
+if inputs==0:
+     dictionary=file_process()
+elif inputs==1:
+     dictionary=load_py()
+else:
+     exit()
+
 def voice_read(txt):
      engine=init()
      engine.setProperty('rate',120)
@@ -101,8 +113,8 @@ def voice_read(txt):
 while True:         
      word=input("请输入你要查询的单词:\n")
      if word=='q':
-          print("在退出前，会将dicionary导出")
-          save_dict_to_txt(dictionary,"output.txt")
+          print("退出前将导出字典")
+          save_dict_to_py(dictionary, "output.py")
           break
      else:
           flag=False
